@@ -66,7 +66,7 @@ class _RegisterPageState extends State<RegisterPage> {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                try {
+                /* try {
                   final response = await http.post(
                     Uri.parse(''),
                     headers: {'Content-Type': 'application/json'},
@@ -84,7 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 }
                 } catch (error) {
                   print('Error: $error');
-                }
+                } */
               },
               child: Text('Criar conta'),
             ),
