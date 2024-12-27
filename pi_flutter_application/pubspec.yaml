@@ -1,6 +1,6 @@
 name: pi_flutter_application
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
@@ -9,7 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  http: ^1.2.2
+  shared_preferences: 
+  jwt_decoder:
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
