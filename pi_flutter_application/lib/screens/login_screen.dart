@@ -49,9 +49,10 @@ class _LoginPageState extends State<LoginPage> {
           print("Response: $jsonResponse");
           if (jsonResponse['status'] == true) {
             Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BottomNavigator()),
-            );
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BottomNavigator(),
+                ));
             var myToken = jsonResponse['token'] as String;
             print("Token: $myToken");
             prefs.setString('token', myToken);
