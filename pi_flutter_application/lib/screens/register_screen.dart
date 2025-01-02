@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'login_screen.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,7 +11,37 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  bool isSwitched = false;
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  void registerUser() async {
+    if (usernameController.text.isNotEmpty &&
+        passwordController.text.isNotEmpty) {
+      var reqBody = {
+        "username": usernameController.text,
+        "password": passwordController.text,
+      };
+
+      try {
+        final response = await http.post(
+          Uri.parse('http://192.168.1.218:5000/users/register/'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(reqBody),
+        );
+
+        if (response.statusCode == 200) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        } else {
+          print('Registration failed');
+        }
+      } catch (error) {
+        print('Error: $error');
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +57,15 @@ class _RegisterPageState extends State<RegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
+              controller: usernameController,
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Username',
                 border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 16),
             TextField(
+              controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -39,53 +73,8 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             SizedBox(height: 16),
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Nome',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "És administrador?",
-                  style: TextStyle(fontSize: 16),
-                ),
-                Switch(
-                    value: isSwitched,
-                    onChanged: (value) {
-                      setState(() {
-                        isSwitched = value;
-                      });
-                    }),
-              ],
-            ),
-            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () async {
-                /* try {
-                  final response = await http.post(
-                    Uri.parse(''),
-                    headers: {'Content-Type': 'application/json'},
-                    body: jsonEncode({
-                      'email': email,
-                      'password': password,
-                      'nome': username,
-                    }),
-                  );
-                if (response.statusCode == 201) {
-                  Navigator.push(
-                    context, 
-                  MaterialPageRoute(builder: (context) => RegisterPage()),
-                  );
-                }
-                } catch (error) {
-                  print('Error: $error');
-                } */
-              },
+              onPressed: registerUser,
               child: Text('Criar conta'),
             ),
           ],

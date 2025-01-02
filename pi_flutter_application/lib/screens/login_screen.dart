@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bottom_navigator.dart';
@@ -14,8 +16,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController usernameController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController usernameLoginController = TextEditingController();
+  TextEditingController passwordLoginController = TextEditingController();
   late SharedPreferences prefs;
 
   @override
@@ -29,33 +31,51 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void loginUser() async {
-    if (usernameController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty) {
+    if (usernameLoginController.text.isNotEmpty &&
+        passwordLoginController.text.isNotEmpty) {
       var reqBody = {
-        "email": usernameController,
-        "password": passwordController
+        "username": usernameLoginController.text,
+        "password": passwordLoginController.text
       };
 
-      var response = await http.post(
-          Uri.parse("http://localhost:5000/users/login/"),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode(reqBody));
+      try {
+        var response = await http.post(
+            Uri.parse("http://192.168.1.218:5000/users/login/"),
+            headers: {"Content-Type": "application/json"},
+            body: jsonEncode(reqBody));
 
-      var jsonResponse = jsonDecode(response.body);
-      if (jsonResponse['status']) {
-        Navigator.pop(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const LoginPage(),
-            ));
-
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BottomNavigator(),
-            ));
-      } else {
-        print("Something went wrong!");
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          var jsonResponse = jsonDecode(response.body);
+          print("Response: $jsonResponse");
+          if (jsonResponse['status'] == true) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BottomNavigator()),
+            );
+            var myToken = jsonResponse['token'] as String;
+            print("Token: $myToken");
+            prefs.setString('token', myToken);
+            if (prefs.containsKey('token')) {
+              print("Token saved successfully!");
+            } else {
+              print("Failed to save token!");
+            }
+          } else {
+            print("Something went wrong!");
+          }
+        } else {
+          print("Failed to login: ${response.reasonPhrase}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Failed to login: ${response.reasonPhrase}')),
+          );
+        }
+      } catch (e) {
+        if (e is FormatException) {
+          print("FormatException: ${e.message}");
+        } else {
+          print("An error occurred: $e");
+        }
       }
     }
   }
@@ -74,7 +94,7 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextField(
-              controller: usernameController,
+              controller: usernameLoginController,
               decoration: const InputDecoration(
                 labelText: 'Username',
                 border: OutlineInputBorder(),
@@ -83,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
             const SizedBox(height: 16),
             TextField(
               obscureText: true,
-              controller: passwordController,
+              controller: passwordLoginController,
               decoration: const InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
