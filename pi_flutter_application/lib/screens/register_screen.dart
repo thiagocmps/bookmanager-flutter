@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -9,13 +10,15 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final password = TextEditingController();
+  final username = TextEditingController();
   bool isSwitched = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Registrar'),
+        title: const Text('Registrar'),
         centerTitle: true,
       ),
       body: Padding(
@@ -24,14 +27,17 @@ class _RegisterPageState extends State<RegisterPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            SizedBox(height: 16),
             TextField(
+              controller: username,
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Nome',
                 border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 16),
             TextField(
+              controller: password,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -39,54 +45,31 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             ),
             SizedBox(height: 16),
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Nome',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "És administrador?",
-                  style: TextStyle(fontSize: 16),
-                ),
-                Switch(
-                    value: isSwitched,
-                    onChanged: (value) {
-                      setState(() {
-                        isSwitched = value;
-                      });
-                    }),
-              ],
-            ),
-            SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                /* try {
+                try {
                   final response = await http.post(
-                    Uri.parse(''),
+                    Uri.parse('colocar o link da api'),
                     headers: {'Content-Type': 'application/json'},
                     body: jsonEncode({
-                      'email': email,
-                      'password': password,
-                      'nome': username,
+                      'password': password.text,
+                      'nome': username.text,
                     }),
                   );
-                if (response.statusCode == 201) {
-                  Navigator.push(
-                    context, 
-                  MaterialPageRoute(builder: (context) => RegisterPage()),
-                  );
-                }
+                  if (response.statusCode == 201) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const RegisterPage()),
+                    );
+                  } else {
+                    print('Failed to create account: ${response.statusCode}');
+                  }
                 } catch (error) {
                   print('Error: $error');
-                } */
+                }
               },
-              child: Text('Criar conta'),
+              child: const Text('Criar conta'),
             ),
           ],
         ),
