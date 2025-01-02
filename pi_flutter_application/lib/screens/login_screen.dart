@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart'; // Adicionado
 
 import '../bottom_navigator.dart';
 import 'package:flutter/material.dart';
