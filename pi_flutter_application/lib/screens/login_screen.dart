@@ -48,11 +48,11 @@ class _LoginPageState extends State<LoginPage> {
         if (response.statusCode == 200 || response.statusCode == 201) {
           var jsonResponse = jsonDecode(response.body);
           print("Response: $jsonResponse");
-          if (jsonResponse['status'] == true) {
+          if (jsonResponse != null) {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BottomNavigator(),
+                  builder: (context) => BottomNavigator(token: jsonResponse),
                 ));
             var myToken = jsonResponse['token'] as String;
             print("Token: $myToken");
@@ -72,11 +72,11 @@ class _LoginPageState extends State<LoginPage> {
                 content: Text('Failed to login: ${response.reasonPhrase}')),
           );
         }
-      } catch (e) {
-        if (e is FormatException) {
-          print("FormatException: ${e.message}");
+      } catch (error) {
+        if (error is FormatException) {
+          print("FormatException: ${error.message}");
         } else {
-          print("An error occurred: $e");
+          print("An error occurred: $error");
         }
       }
     }
