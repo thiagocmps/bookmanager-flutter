@@ -5,6 +5,7 @@ import 'screens/pages/search_page.dart';
 import 'screens/pages/library_page.dart';
 import 'screens/pages/account_page.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'screens/login_screen.dart';
 
 class BottomNavigator extends StatefulWidget {
   final token;
