@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pi_flutter_application/bottom_navigator.dart';
-import '../login_screen.dart';
+import '../screens/login_screen.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});

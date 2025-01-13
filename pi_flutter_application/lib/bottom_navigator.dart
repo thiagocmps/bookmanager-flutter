@@ -1,9 +1,9 @@
-import 'screens/pages/premium_page.dart';
+import 'pages/premium_page.dart';
 import 'package:flutter/material.dart';
-import 'screens/pages/home_page.dart';
-import 'screens/pages/search_page.dart';
-import 'screens/pages/library_page.dart';
-import 'screens/pages/account_page.dart';
+import 'pages/home_page.dart';
+import 'pages/search_page.dart';
+import 'pages/library_page.dart';
+import 'pages/account_page.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'screens/login_screen.dart';
 
@@ -18,13 +18,6 @@ class BottomNavigator extends StatefulWidget {
 class _BottomNavigatorState extends State<BottomNavigator> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const HomePage(),
-    const SearchPage(),
-    const LibraryPage(),
-    const AccountPage(),
-  ];
-
   late String role;
 
   @override
@@ -37,6 +30,12 @@ class _BottomNavigatorState extends State<BottomNavigator> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      HomePage(key: widget.token),
+      const SearchPage(),
+      const LibraryPage(),
+      const AccountPage(),
+    ];
     bool isAdmin = role == 'admin' ? true : false;
     if (isAdmin == true) {
       _pages.add(const AdminPage());
