@@ -17,7 +17,7 @@ class _AccountPageState extends State<AccountPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Account Page'),
+            const Text('Account Page'),
             ElevatedButton(
               onPressed: () {
                 Navigator.push(

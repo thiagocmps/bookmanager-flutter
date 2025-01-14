@@ -9,7 +9,7 @@ import 'screens/login_screen.dart';
 
 class BottomNavigator extends StatefulWidget {
   final token;
-  const BottomNavigator({@required this.token, Key? key}) : super(key: key);
+  const BottomNavigator({@required this.token, super.key});
 
   @override
   _BottomNavigatorState createState() => _BottomNavigatorState();
@@ -30,7 +30,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [
+    final List<Widget> pages = [
       HomePage(key: widget.token),
       const SearchPage(),
       const LibraryPage(),
@@ -38,11 +38,11 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     ];
     bool isAdmin = role == 'admin' ? true : false;
     if (isAdmin == true) {
-      _pages.add(const AdminPage());
+      pages.add(const AdminPage());
     }
 
     return Scaffold(
-      body: _pages[_currentIndex],
+      body: pages[_currentIndex],
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {

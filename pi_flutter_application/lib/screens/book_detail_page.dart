@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BookDetailPage extends StatefulWidget {
   final Map<String, dynamic> book;
 
-  BookDetailPage({super.key, required this.book});
+  const BookDetailPage({super.key, required this.book});
 
   @override
   State<BookDetailPage> createState() => _BookDetailPageState();
@@ -38,7 +38,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   ButtonTheme(
                     minWidth: 40,
                     height: 40,
@@ -51,7 +51,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                             return StatefulBuilder(
                               builder:
                                   (BuildContext context, StateSetter setState) {
-                                return Container(
+                                return SizedBox(
                                   height: 400,
                                   width: double.infinity,
                                   child: Column(

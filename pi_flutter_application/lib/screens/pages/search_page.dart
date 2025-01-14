@@ -1,16 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../screens/book_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
-
   @override
-  State<SearchPage> createState() => _SearchPageState();
+  State<SearchPage> createState() => _SearchPage();
 }
 
-class _SearchPageState extends State<SearchPage> {
+class _SearchPage extends State<SearchPage> {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Search',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 255, 255, 255)),
+        useMaterial3: true,
+      ),
+      home: const SearchBarAPI(),
+    );
+  }
+}
+
+class SearchBarAPI extends StatefulWidget {
+  const SearchBarAPI({super.key});
+
+  @override
+  State<SearchBarAPI> createState() => _SearchBarAPIState();
+}
+
+class _SearchBarAPIState extends State<SearchBarAPI> {
   final TextEditingController _searchController = TextEditingController();
   final List<dynamic> _searchResults = [];
   bool _isLoading = false;
@@ -196,5 +217,91 @@ class _SearchPageState extends State<SearchPage> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+}
+
+class BookDetailPage extends StatelessWidget {
+  final Map<String, dynamic> book;
+
+  const BookDetailPage({super.key, required this.book});
+
+  @override
+  Widget build(BuildContext context) {
+    final volumeInfo = book['volumeInfo'];
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(volumeInfo['title'] ?? 'Detalhes do Livro'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (volumeInfo['imageLinks'] != null)
+                Image.network(volumeInfo['imageLinks']['thumbnail'] ?? ''),
+              const SizedBox(height: 10),
+              Text('Título: ${volumeInfo['title'] ?? 'N/A'}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('Subtítulo: ${volumeInfo['subtitle'] ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('Autores: ${volumeInfo['authors']?.join(', ') ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('Editora: ${volumeInfo['publisher'] ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(
+                  'Data de Publicação: ${volumeInfo['publishedDate'] ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('Descrição: ${volumeInfo['description'] ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(
+                  'Identificadores da Indústria: ${volumeInfo['industryIdentifiers']?.map((id) => '${id['type']}: ${id['identifier']}').join(', ') ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(
+                  'Modos de Leitura: ${volumeInfo['readingModes'] != null ? 'Texto: ${volumeInfo['readingModes']['text']}, Imagem: ${volumeInfo['readingModes']['image']}' : 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('Contagem de Páginas: ${volumeInfo['pageCount'] ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text('Tipo de Impressão: ${volumeInfo['printType'] ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
+              Text(
+                  'Categorias: ${volumeInfo['categories']?.join(', ') ?? 'N/A'}',
+                  style: const TextStyle(fontSize: 16)),
+              const SizedBox(height: 16),
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      // Ação do botão
+                    },
+                    child: const Text(
+                      '+',
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
