@@ -31,10 +31,10 @@ class _BottomNavigatorState extends State<BottomNavigator> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      HomePage(key: widget.token),
-      const SearchPage(),
-      const LibraryPage(),
-      const AccountPage(),
+      HomePage(token: widget.token),
+      SearchPage(token: widget.token),
+      LibraryPage(token: widget.token),
+      AccountPage(token: widget.token),
     ];
     bool isAdmin = role == 'admin' ? true : false;
     if (isAdmin == true) {

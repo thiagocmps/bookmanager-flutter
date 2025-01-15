@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         var response = await http.post(
-            Uri.parse("http://192.168.93.36:5000/users/login/"),
+            Uri.parse("http://172.23.113.226:5000/users/login/"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode(reqBody));
 

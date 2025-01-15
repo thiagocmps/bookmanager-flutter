@@ -31,7 +31,8 @@ class _BookDetailPageState extends State<BookDetailPage> {
                         volumeInfo['imageLinks']['thumbnail'] ?? '')),
               const SizedBox(height: 36),
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
                     child: Text('${volumeInfo['title'] ?? 'N/A'}',

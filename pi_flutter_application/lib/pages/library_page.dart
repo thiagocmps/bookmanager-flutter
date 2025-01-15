@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-
 class LibraryPage extends StatefulWidget {
-  const LibraryPage({super.key});
+  final token;
+  const LibraryPage({@required this.token, super.key});
 
   @override
   State<LibraryPage> createState() => _LibraryPageState();

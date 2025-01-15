@@ -4,7 +4,8 @@ import 'dart:convert';
 import '../screens/book_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  final token;
+  const SearchPage({@required this.token, super.key});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
