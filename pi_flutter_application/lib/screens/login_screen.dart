@@ -1,8 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'package:shared_preferences/shared_preferences.dart';
-// Adicionado
-
 import '../bottom_navigator.dart';
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
@@ -29,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void initSharedPref() async {
     prefs = await SharedPreferences.getInstance();
+    print("Shared Preferences initialized!: $prefs");
   }
 
   void loginUser() async {
@@ -41,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         var response = await http.post(
-            Uri.parse("http://172.23.113.226:5000/users/login/"),
+            Uri.parse("http://192.168.1.217:5000/users/login/"),
             headers: {"Content-Type": "application/json"},
             body: jsonEncode(reqBody));
 
@@ -49,12 +48,8 @@ class _LoginPageState extends State<LoginPage> {
           var jsonResponse = jsonDecode(response.body);
           print("Response: $jsonResponse");
           if (jsonResponse != null) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BottomNavigator(token: jsonResponse),
-                ));
-            var myToken = jsonResponse['token'] as String;
+            var myToken = jsonResponse as String;
+
             print("Token: $myToken");
             prefs.setString('token', myToken);
             if (prefs.containsKey('token')) {
@@ -62,6 +57,13 @@ class _LoginPageState extends State<LoginPage> {
             } else {
               print("Failed to save token!");
             }
+
+            Navigator.of(context).pop();
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BottomNavigator(token: jsonResponse),
+                ));
           } else {
             print("Something went wrong!");
           }

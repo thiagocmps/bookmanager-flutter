@@ -1,3 +1,4 @@
+// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -15,6 +16,7 @@ class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   final List<dynamic> _searchResults = [];
   bool _isLoading = false;
+  bool? isChecked = false;
 
   Future<void> _searchApi(String query) async {
     if (query.isEmpty) {
@@ -84,13 +86,112 @@ class _SearchPageState extends State<SearchPage> {
                 fillColor:
                     Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
-              onChanged: (value) {
+              /* onChanged: (value) {
                 Future.delayed(const Duration(milliseconds: 500), () {
                   if (value == _searchController.text) {
                     _searchApi(value);
                   }
                 });
-              },
+              }, */
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              // ignore: sort_child_properties_last
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.style),
+                        SizedBox(width: 8),
+                        Text(
+                          'Categorias',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    CheckboxListTile(
+                        title: const Text('Marcar/desmarcar todos'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                    Divider(
+                      thickness: 1,
+                      color: Colors.grey,
+                    ),
+                    CheckboxListTile(
+                        title: const Text('Humor'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                    CheckboxListTile(
+                        title: const Text('True Crime'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                    CheckboxListTile(
+                        title: const Text('Juvenile Fiction'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                    CheckboxListTile(
+                        title: const Text('Juvenile Nonfiction'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                    CheckboxListTile(
+                        title: const Text('Young Adult Fiction'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                    CheckboxListTile(
+                        title: const Text('Young Adult Nonfiction'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                    CheckboxListTile(
+                        title: const Text('Science'),
+                        value: isChecked,
+                        onChanged: (newBool) {
+                          setState(() {
+                            isChecked = newBool;
+                          });
+                        }),
+                  ],
+                ),
+              ),
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: const Color.fromARGB(72, 225, 190, 231),
+                borderRadius: BorderRadius.circular(16.0),
+              ),
             ),
           ),
           Expanded(

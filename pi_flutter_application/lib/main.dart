@@ -6,9 +6,16 @@ import 'bottom_navigator.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  runApp(MainApp(token: prefs.getString('token')));
-  print('Token: ${prefs.getString('token')}');
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final String? futureToken = prefs.getString('token');
+  if (futureToken != null) {
+    String token = futureToken.substring(1, futureToken.length - 1);
+    runApp(MainApp(token: token));
+    print('Token: $token');
+  } else {
+    runApp(MainApp(token: null));
+    print('Token não encontrado');
+  }
 }
 
 class MainApp extends StatelessWidget {
