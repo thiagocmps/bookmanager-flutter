@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../screens/book_detail_page.dart';
+import '../screens/result_search_book.dart';
 
 class SearchPage extends StatefulWidget {
   final token;
@@ -13,290 +13,238 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final TextEditingController _searchController = TextEditingController();
-  final List<dynamic> _searchResults = [];
-  bool _isLoading = false;
-  bool? isChecked = false;
+  final TextEditingController _queryController = TextEditingController();
+  final TextEditingController _minPageController = TextEditingController();
+  final TextEditingController _maxPageController = TextEditingController();
+  final TextEditingController _minYearController = TextEditingController();
+  final TextEditingController _maxYearController = TextEditingController();
 
-  Future<void> _searchApi(String query) async {
-    if (query.isEmpty) {
-      setState(() {
-        _searchResults.clear();
-      });
-      return;
-    }
+  final List<String> allGenres = [
+    'Antiques & Collectibles',
+    'Literary Collections',
+    'Architecture',
+    'Literary Criticism',
+    'Art',
+    'Mathematics',
+    'Bibles',
+    'Medical',
+    'Biography & Autobiography',
+    'Music',
+    'Body, Mind & Spirit',
+    'Nature',
+    'Business & Economics',
+    'Performing Arts',
+    'Comics & Graphic Novels',
+    'Pets',
+    'Computers',
+    'Philosophy',
+    'Cooking',
+    'Photography',
+    'Crafts & Hobbies',
+    'Poetry',
+    'Design',
+    'Political Science',
+    'Drama',
+    'Psychology',
+    'Education',
+    'Reference',
+    'Family & Relationships',
+    'Religion',
+    'Fiction',
+    'Science',
+    'Games & Activities',
+    'Self-Help',
+    'Gardening',
+    'Social Science',
+    'Health & Fitness',
+    'Sports & Recreation',
+    'History',
+    'Study Aids',
+    'House & Home',
+    'Technology & Engineering',
+    'Humor',
+    'Transportation',
+    'Juvenile Fiction',
+    'Travel',
+    'Juvenile Nonfiction',
+    'True Crime',
+    'Language Arts & Disciplines',
+    'Young Adult Fiction',
+    'Language Study',
+    'Young Adult Nonfiction',
+    'Law'
+  ];
 
-    setState(() {
-      _isLoading = true;
-    });
+  Map<String, bool> selectedGenres = {};
 
-    try {
-      final response = await http.get(
-        Uri.parse(
-            'https://www.googleapis.com/books/v1/volumes?q=$query&key=AIzaSyBBY8mAYc9WeCA5-j0Xfi5VUocfHXhjzlc'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _searchResults.clear();
-          _searchResults.addAll(data['items'] ?? []);
-          _isLoading = false;
-        });
-      } else {
-        throw Exception('Falha ao carregar dados: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao buscar dados: $e')),
-        );
-      }
+  @override
+  void initState() {
+    super.initState();
+    for (var genre in allGenres) {
+      selectedGenres[genre] = false;
     }
   }
 
-  void _navigateToDetailPage(Map<String, dynamic> book) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BookDetailPage(book: book),
-      ),
+  Future<void> searchBooks(BuildContext context) async {
+    final String query = _queryController.text;
+    final List<String> genres = selectedGenres.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+    final String? minPages =
+        _minPageController.text.isNotEmpty ? _minPageController.text : null;
+    final String? maxPages =
+        _maxPageController.text.isNotEmpty ? _maxPageController.text : null;
+    final String? minYear =
+        _minYearController.text.isNotEmpty ? _minYearController.text : null;
+    final String? maxYear =
+        _maxYearController.text.isNotEmpty ? _maxYearController.text : null;
+
+    String searchQuery = query.isNotEmpty ? query : '';
+    if (genres.isNotEmpty) {
+      searchQuery += '+(${genres.map((g) => 'subject:"$g"').join('=OR=')})';
+    }
+
+    if (minPages != null || maxPages != null) {
+      searchQuery += '+pageCount:';
+      if (minPages != null) searchQuery += '$minPages..';
+      if (maxPages != null) searchQuery += maxPages;
+      print('searchQuery pages: $searchQuery');
+    }
+
+    if (minYear != null || maxYear != null) {
+      searchQuery += '+publishedDate:';
+      if (minYear != null) searchQuery += minYear;
+      searchQuery += '..';
+      if (maxYear != null) searchQuery += maxYear;
+      print('searchQuery date: $searchQuery');
+    }
+
+    final url =
+        Uri.parse('https://www.googleapis.com/books/v1/volumes').replace(
+      queryParameters: {
+        'q': searchQuery,
+        'maxResults': '40',
+        'key': 'AIzaSyA1EyhuRlsRfmYajM17mF3dGtvh0nZtRyk',
+      },
     );
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final books = data['items'] ?? [];
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                ResultBooksScreen(books: books, token: widget.token),
+          ),
+        );
+      } else {
+        throw Exception('Erro: ${response.statusCode}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao buscar livros: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Digite para pesquisar os livros...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-                filled: true,
-                fillColor:
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-              /* onChanged: (value) {
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (value == _searchController.text) {
-                    _searchApi(value);
-                  }
-                });
-              }, */
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              // ignore: sort_child_properties_last
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.style),
-                        SizedBox(width: 8),
-                        Text(
-                          'Categorias',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    CheckboxListTile(
-                        title: const Text('Marcar/desmarcar todos'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                    Divider(
-                      thickness: 1,
-                      color: Colors.grey,
-                    ),
-                    CheckboxListTile(
-                        title: const Text('Humor'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                    CheckboxListTile(
-                        title: const Text('True Crime'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                    CheckboxListTile(
-                        title: const Text('Juvenile Fiction'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                    CheckboxListTile(
-                        title: const Text('Juvenile Nonfiction'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                    CheckboxListTile(
-                        title: const Text('Young Adult Fiction'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                    CheckboxListTile(
-                        title: const Text('Young Adult Nonfiction'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                    CheckboxListTile(
-                        title: const Text('Science'),
-                        value: isChecked,
-                        onChanged: (newBool) {
-                          setState(() {
-                            isChecked = newBool;
-                          });
-                        }),
-                  ],
-                ),
-              ),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(72, 225, 190, 231),
-                borderRadius: BorderRadius.circular(16.0),
+      appBar: AppBar(
+        title: const Text('Busca de Livros'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _queryController,
+              decoration: const InputDecoration(
+                labelText: 'Nome do Livro',
+                border: OutlineInputBorder(),
               ),
             ),
-          ),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.6,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _minPageController,
+                    decoration: const InputDecoration(
+                      labelText: 'Páginas mínimas',
+                      border: OutlineInputBorder(),
                     ),
-                    itemCount: _searchResults.length,
-                    itemBuilder: (context, index) {
-                      final repo = _searchResults[index];
-                      final imageUrl =
-                          repo['volumeInfo']['imageLinks']?['thumbnail'] ?? '';
-                      return GestureDetector(
-                        onTap: () => _navigateToDetailPage(
-                            repo), // Navegar para a página de detalhes
-                        child: Card(
-                          elevation:
-                              4, // Sombra para dar um efeito de profundidade
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                12), // Bordas arredondadas
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // Container para a imagem ocupando a parte superior
-                              Container(
-                                height: 120, // Altura fixa para a imagem
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(
-                                          12)), // Bordas arredondadas na parte superior
-                                  image: DecorationImage(
-                                    image: imageUrl.isNotEmpty
-                                        ? NetworkImage(imageUrl)
-                                        : const AssetImage(
-                                                'assets/placeholder.png')
-                                            as ImageProvider, // Placeholder se não houver imagem
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      repo['volumeInfo']['title'] ??
-                                          'Título não disponível',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(
-                                        height:
-                                            4), // Espaçamento entre título e descrição
-                                    Text(
-                                      repo['volumeInfo']['description'] ??
-                                          'Descrição não disponível',
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    const SizedBox(
-                                        height:
-                                            8), // Espaçamento antes da avaliação
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.star,
-                                            color: Colors.amber, size: 14),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${repo['volumeInfo']['averageRating'] ?? 'N/A'}',
-                                          style: const TextStyle(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                    keyboardType: TextInputType.number,
                   ),
-          ),
-        ],
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _maxPageController,
+                    decoration: const InputDecoration(
+                      labelText: 'Páginas máximas',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _minYearController,
+                    decoration: const InputDecoration(
+                      labelText: 'Ano mínimo',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _maxYearController,
+                    decoration: const InputDecoration(
+                      labelText: 'Ano máximo',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text('Selecione os Gêneros:'),
+            Expanded(
+              child: ListView(
+                children: allGenres.map((genre) {
+                  return CheckboxListTile(
+                    title: Text(genre),
+                    value: selectedGenres[genre],
+                    onChanged: (isSelected) {
+                      setState(() {
+                        selectedGenres[genre] = isSelected ?? false;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => searchBooks(context),
+              child: const Text('Pesquisar'),
+            ),
+          ],
+        ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 }
