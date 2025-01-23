@@ -2,11 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../screens/book_detail_page.dart';
 import '../screens/result_search_book.dart';
 
 class SearchPage extends StatefulWidget {
   final token;
-  const SearchPage({@required this.token, super.key});
+  final decodedToken;
+  const SearchPage(
+      {@required this.token, required this.decodedToken, super.key});
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -124,7 +127,7 @@ class _SearchPageState extends State<SearchPage> {
         Uri.parse('https://www.googleapis.com/books/v1/volumes').replace(
       queryParameters: {
         'q': searchQuery,
-        'maxResults': '40',
+        'maxResults': '20',
         'key': 'AIzaSyA1EyhuRlsRfmYajM17mF3dGtvh0nZtRyk',
       },
     );
@@ -138,8 +141,10 @@ class _SearchPageState extends State<SearchPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                ResultBooksScreen(books: books, token: widget.token),
+            builder: (context) => ResultBooksScreen(
+                books: books,
+                token: widget.token,
+                decodedToken: widget.decodedToken),
           ),
         );
       } else {

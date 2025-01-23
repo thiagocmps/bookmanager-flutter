@@ -19,20 +19,21 @@ class _BottomNavigatorState extends State<BottomNavigator> {
   int _currentIndex = 0;
 
   late String role;
+  late Map<String, dynamic> decodedToken;
 
   @override
   void initState() {
     super.initState();
     Map<String, dynamic> jwtDecodedToken = JwtDecoder.decode(widget.token);
-
+    decodedToken = jwtDecodedToken;
     role = jwtDecodedToken['data']?['role'];
   }
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> pages = [
-      HomePage(token: widget.token),
-      SearchPage(token: widget.token),
+      HomePage(token: widget.token, decodedToken: decodedToken),
+      SearchPage(token: widget.token, decodedToken: decodedToken),
       LibraryPage(token: widget.token),
       AccountPage(token: widget.token),
     ];

@@ -6,7 +6,8 @@ import '../screens/book_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   final token;
-  const HomePage({@required this.token, super.key});
+  final decodedToken;
+  const HomePage({@required this.token, this.decodedToken, super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -61,7 +62,11 @@ class _HomePageState extends State<HomePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => BookDetailPage(book: book),
+        builder: (context) => BookDetailPage(
+          book: book,
+          token: widget.token,
+          decodedToken: widget.decodedToken,
+        ),
       ),
     );
   }

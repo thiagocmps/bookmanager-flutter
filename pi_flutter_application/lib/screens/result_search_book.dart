@@ -4,7 +4,9 @@ import '../screens/book_detail_page.dart';
 class ResultBooksScreen extends StatefulWidget {
   final books;
   final token;
-  const ResultBooksScreen({@required this.books, this.token, super.key});
+  final decodedToken;
+  const ResultBooksScreen(
+      {@required this.books, this.token, this.decodedToken, super.key});
 
   @override
   State<ResultBooksScreen> createState() => _ResultBooksScreenState();
@@ -33,14 +35,13 @@ class _ResultBooksScreenState extends State<ResultBooksScreen> {
 
                 return GestureDetector(
                   onTap: () {
-                    // Navegar para a página de detalhes do livro
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => BookDetailPage(
-                          book:
-                              widget.books[index], // Passando o livro completo
-                        ),
+                            book: widget.books[index],
+                            token: widget.token,
+                            decodedToken: widget.decodedToken),
                       ),
                     );
                   },

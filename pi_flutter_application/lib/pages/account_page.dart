@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pi_flutter_application/bottom_navigator.dart';
 import '../screens/login_screen.dart';
 
 class AccountPage extends StatefulWidget {
@@ -22,12 +21,16 @@ class _AccountPageState extends State<AccountPage> {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
+                widget.token == null;
+
+                print('Token "vazio": ${widget.token}');
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => const LoginPage(),
                   ),
                 );
+                Navigator.pop(context);
               },
               child: const Text('Logout'),
             ),
