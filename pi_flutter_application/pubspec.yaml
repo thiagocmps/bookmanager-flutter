@@ -12,6 +12,7 @@ dependencies:
   http: ^1.2.2
   shared_preferences: ^2.3.5
   jwt_decoder: ^2.0.1
+  confirm_dialog: ^1.0.4
   
 dev_dependencies:
   flutter_test:

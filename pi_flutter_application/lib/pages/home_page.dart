@@ -3,36 +3,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../screens/book_detail_page.dart';
 
-class Book {
-  final String title;
-  final String author;
-  final String imageUrl;
-  final double rating;
-  final int pages;
-  final String description;
-
-  Book({
-    required this.title,
-    required this.author,
-    required this.imageUrl,
-    required this.rating,
-    required this.pages,
-    this.description = 'Descrição não disponível',
-  });
-
-  factory Book.fromJson(Map<String, dynamic> json) {
-    final volumeInfo = json['volumeInfo'];
-    return Book(
-      title: volumeInfo['title'] ?? 'Unknown Title',
-      author: (volumeInfo['authors'] as List<dynamic>?)?.first ?? 'Unknown Author',
-      imageUrl: volumeInfo['imageLinks']?['thumbnail'] ?? 'https://via.placeholder.com/150',
-      rating: (volumeInfo['averageRating'] ?? 4.0).toDouble(),
-      pages: volumeInfo['pageCount'] ?? 0,
-      description: volumeInfo['description'] ?? 'Descrição não disponível',
-    );
-  }
-}
-
 class HomePage extends StatefulWidget {
   final token;
   final decodedToken;
@@ -44,8 +14,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
-  List<Book> _searchResults = [];
-  
+  List searchResults = [];
+
   final genres = [
     'Fantasy',
     'Science Fiction',
@@ -53,45 +23,7 @@ class _HomePageState extends State<HomePage> {
     'Romance',
   ];
 
-  Future<void> _searchBooks(String query) async {
-    if (query.isEmpty) {
-      setState(() {
-        _searchResults.clear();
-      });
-      return;
-    }
-
-    setState(() {
-    });
-
-    try {
-      final response = await http.get(
-        Uri.parse(
-          'https://www.googleapis.com/books/v1/volumes?q=$query&key=AIzaSyBBY8mAYc9WeCA5-j0Xfi5VUocfHXhjzlc'
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final items = data['items'] as List<dynamic>? ?? [];
-        setState(() {
-          _searchResults = items.map((item) => Book.fromJson(item)).toList();
-        });
-      } else {
-        throw Exception('Falha ao carregar dados: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      setState(() {
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao buscar dados: $e')),
-        );
-      }
-    }
-  }
-
-  void _navigateToDetailPage(Book book) {
+  void _navigateToDetailPage(book) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -107,14 +39,12 @@ class _HomePageState extends State<HomePage> {
   Widget _buildRatingStars(double rating) {
     return Row(
       children: List.generate(
-        5, 
-        (index) => Icon(
-          index < rating.floor() ? Icons.star : Icons.star_border, 
-          color: Colors.amber[400], 
-          size: 16
-        )
-      )..add(
-        Padding(
+          5,
+          (index) => Icon(
+              index < rating.floor() ? Icons.star : Icons.star_border,
+              color: Colors.amber[400],
+              size: 16))
+        ..add(Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Text(
             '${rating.toStringAsFixed(1)}/5',
@@ -123,8 +53,7 @@ class _HomePageState extends State<HomePage> {
               fontSize: 12,
             ),
           ),
-        )
-      ),
+        )),
     );
   }
 
@@ -133,41 +62,34 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Digite para pesquisar os livros...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-              ),
-              onChanged: (value) {
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (value == _searchController.text) {
-                    _searchBooks(value);
-                  }
-                });
-              },
-            ),
-          ),
-          _searchResults.isNotEmpty
+          searchResults.isNotEmpty
               ? Expanded(
                   child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.6,
                       crossAxisSpacing: 8.0,
                       mainAxisSpacing: 8.0,
                     ),
-                    itemCount: _searchResults.length,
+                    itemCount: searchResults.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
-                        onTap: () => _navigateToDetailPage(_searchResults[index]),
+                        onTap: () {
+                          print(
+                              'Tapped on book: ${searchResults[index].title}');
+                          /* Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookDetailPage(
+                                book: searchResults[index],
+                                token: widget.token,
+                                decodedToken: widget.decodedToken,
+                              ),
+                            ),
+                          ); */
+                        },
+                        behavior: HitTestBehavior.translucent,
                         child: Card(
                           elevation: 4,
                           shape: RoundedRectangleBorder(
@@ -180,10 +102,10 @@ class _HomePageState extends State<HomePage> {
                                 height: 120,
                                 decoration: BoxDecoration(
                                   borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(12)
-                                  ),
+                                      top: Radius.circular(12)),
                                   image: DecorationImage(
-                                    image: NetworkImage(_searchResults[index].imageUrl),
+                                    image: NetworkImage(
+                                        searchResults[index].imageUrl),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -194,7 +116,7 @@ class _HomePageState extends State<HomePage> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      _searchResults[index].title,
+                                      searchResults[index].title,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 14,
@@ -204,13 +126,14 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      _searchResults[index].description,
+                                      searchResults[index].description,
                                       maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(fontSize: 12),
                                     ),
                                     const SizedBox(height: 8),
-                                    _buildRatingStars(_searchResults[index].rating),
+                                    _buildRatingStars(
+                                        searchResults[index].rating),
                                   ],
                                 ),
                               ),
@@ -243,7 +166,7 @@ class _HomePageState extends State<HomePage> {
 }
 
 class GenreSection extends StatefulWidget {
-  final String genre;
+  final genre;
   final int genreNumber;
 
   const GenreSection({
@@ -257,20 +180,21 @@ class GenreSection extends StatefulWidget {
 }
 
 class _GenreSectionState extends State<GenreSection> {
-  late Future<List<Book>> _booksFuture;
+  late Future<List> _booksFuture;
 
-  Future<List<Book>> _fetchBooksByGenre() async {
+  Future<List> fetchBooksByGenre() async {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://www.googleapis.com/books/v1/volumes?q=subject:${widget.genre}&maxResults=40'
-        ),
+            'https://www.googleapis.com/books/v1/volumes?q=subject:${widget.genre}&maxResults=40'),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final items = data['items'] as List<dynamic>? ?? [];
-        return items.map((item) => Book.fromJson(item)).toList();
+        final books = data['items'] ?? [];
+        debugPrint('data: $data');
+        debugPrint('Items: $books');
+        return books;
       }
       return [];
     } catch (e) {
@@ -282,7 +206,7 @@ class _GenreSectionState extends State<GenreSection> {
   @override
   void initState() {
     super.initState();
-    _booksFuture = _fetchBooksByGenre();
+    _booksFuture = fetchBooksByGenre();
   }
 
   @override
@@ -302,18 +226,12 @@ class _GenreSectionState extends State<GenreSection> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.chevron_right),
-                onPressed: () {
-                  // Implement genre page navigation if needed
-                },
-              ),
             ],
           ),
         ),
         SizedBox(
           height: 240,
-          child: FutureBuilder<List<Book>>(
+          child: FutureBuilder<List>(
             future: _booksFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -334,9 +252,9 @@ class _GenreSectionState extends State<GenreSection> {
                 child: Row(
                   children: books
                       .map(
-                        (book) => Padding(
+                        (books) => Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: BookCard(book: book),
+                          child: BookCard(book: books),
                         ),
                       )
                       .toList(),
@@ -351,7 +269,7 @@ class _GenreSectionState extends State<GenreSection> {
 }
 
 class BookCard extends StatelessWidget {
-  final Book book;
+  final book;
 
   const BookCard({
     super.key,
@@ -360,11 +278,11 @@ class BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final volumeInfo = book['volumeInfo'];
     return Container(
       width: 280,
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -381,7 +299,10 @@ class BookCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                book.imageUrl,
+                volumeInfo['imageLinks'] != null &&
+                        volumeInfo['imageLinks']['thumbnail'].isNotEmpty
+                    ? volumeInfo['imageLinks']['thumbnail']
+                    : 'https://via.placeholder.com/100',
                 width: 100,
                 height: 150,
                 fit: BoxFit.cover,
@@ -389,7 +310,7 @@ class BookCard extends StatelessWidget {
                   return Container(
                     width: 100,
                     height: 150,
-                    color: Colors.grey[300],
+                    /* color: Colors.grey[300], */
                     child: const Icon(Icons.book, size: 40),
                   );
                 },
@@ -402,7 +323,7 @@ class BookCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    book.title,
+                    volumeInfo['title'],
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -413,7 +334,7 @@ class BookCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    book.author,
+                    volumeInfo['authors']?.join(', ') ?? 'Autor desconhecido',
                     style: TextStyle(
                       color: Colors.grey[700],
                       fontSize: 13,
@@ -423,14 +344,16 @@ class BookCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${book.pages} pages',
+                    '${volumeInfo['pageCount']} páginas',
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 13,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildRatingStars(book.rating),
+                  _buildRatingStars(volumeInfo['averageRating'] != null
+                      ? volumeInfo['averageRating'].toDouble()
+                      : 0),
                 ],
               ),
             ),
@@ -443,14 +366,12 @@ class BookCard extends StatelessWidget {
   Widget _buildRatingStars(double rating) {
     return Row(
       children: List.generate(
-        5, 
-        (index) => Icon(
-          index < rating.floor() ? Icons.star : Icons.star_border, 
-          color: Colors.amber[400], 
-          size: 16
-        )
-      )..add(
-        Padding(
+          5,
+          (index) => Icon(
+              index < rating.floor() ? Icons.star : Icons.star_border,
+              color: Colors.amber[400],
+              size: 16))
+        ..add(Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Text(
             '${rating.toStringAsFixed(1)}/5',
@@ -459,8 +380,7 @@ class BookCard extends StatelessWidget {
               fontSize: 12,
             ),
           ),
-        )
-      ),
+        )),
     );
   }
 }

@@ -33,16 +33,19 @@ class _LoginPageState extends State<LoginPage> {
   void loginUser() async {
     if (usernameLoginController.text.isNotEmpty &&
         passwordLoginController.text.isNotEmpty) {
-      var reqBody = {
+      /* var reqBody = {
         "username": usernameLoginController.text,
         "password": passwordLoginController.text
-      };
+      }; */
 
       try {
-        var response = await http.post(
-            Uri.parse("http://192.168.1.217:5000/users/login/"),
-            headers: {"Content-Type": "application/json"},
-            body: jsonEncode(reqBody));
+        var response =
+            await http.post(Uri.parse("http://192.168.1.217:5000/users/login"),
+                headers: {"Content-Type": "application/json"},
+                body: jsonEncode({
+                  "username": usernameLoginController.text,
+                  "password": passwordLoginController.text
+                }));
 
         if (response.statusCode == 200 || response.statusCode == 201) {
           var jsonResponse = jsonDecode(response.body);
@@ -136,4 +139,10 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+}
+
+clearToken(token) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.remove('token');
+  print("Token removed!" + token);
 }

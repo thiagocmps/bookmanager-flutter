@@ -2,7 +2,7 @@ import 'pages/premium_page.dart';
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
 import 'pages/search_page.dart';
-import 'pages/library_page.dart';
+import 'pages/bookshelf_page.dart';
 import 'pages/account_page.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'screens/login_screen.dart';
@@ -34,8 +34,8 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     final List<Widget> pages = [
       HomePage(token: widget.token, decodedToken: decodedToken),
       SearchPage(token: widget.token, decodedToken: decodedToken),
-      LibraryPage(token: widget.token),
-      AccountPage(token: widget.token),
+      LibraryPage(token: widget.token, decodedToken: decodedToken),
+      AccountPage(token: widget.token, decodedToken: decodedToken),
     ];
     bool isAdmin = role == 'admin' ? true : false;
     if (isAdmin == true) {
@@ -62,7 +62,7 @@ class _BottomNavigatorState extends State<BottomNavigator> {
           ),
           const NavigationDestination(
             icon: Icon(Icons.library_books),
-            label: 'Biblioteca',
+            label: 'Estante',
           ),
           const NavigationDestination(
             icon: Icon(Icons.person),

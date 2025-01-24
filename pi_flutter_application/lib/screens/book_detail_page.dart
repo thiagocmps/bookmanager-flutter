@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class BookDetailPage extends StatefulWidget {
-  final Map<String, dynamic> book;
+  final book;
   final token;
   final decodedToken;
   const BookDetailPage(
@@ -120,7 +120,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                                                     'Content-Type':
                                                         'application/json; charset=UTF-8',
                                                     'Authorization':
-                                                        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7InVzZXJuYW1lIjoiVXNlciIsInJvbGUiOiJ1c2VyIiwiaWQiOiI2NzkwMWVkNTMwNjBhMDBkYTEzYzc2NDAifSwiaWF0IjoxNzM3NjI3NjI5LCJleHAiOjE3NDEyMjc2Mjl9.jX_pVroFMdUSUPwS12i5qXTcCRUjbrwGwQJVElRt-l4',
+                                                        'Bearer ${widget.token}',
                                                   },
                                                   body: jsonEncode(<String,
                                                       dynamic>{
@@ -143,7 +143,7 @@ class _BookDetailPageState extends State<BookDetailPage> {
                                                         'categories'],
                                                     "averageRating": volumeInfo[
                                                         'averageRating'],
-                                                    "imageLinks":
+                                                    "thumbnail":
                                                         volumeInfo['imageLinks']
                                                             ['thumbnail'],
                                                     'userId': userInfo['id'],
