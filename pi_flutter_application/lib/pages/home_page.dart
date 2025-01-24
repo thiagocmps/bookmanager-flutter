@@ -76,18 +76,7 @@ class _HomePageState extends State<HomePage> {
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
-                          print(
-                              'Tapped on book: ${searchResults[index].title}');
-                          /* Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BookDetailPage(
-                                book: searchResults[index],
-                                token: widget.token,
-                                decodedToken: widget.decodedToken,
-                              ),
-                            ),
-                          ); */
+                           _navigateToDetailPage(searchResults[index]);  
                         },
                         behavior: HitTestBehavior.translucent,
                         child: Card(
