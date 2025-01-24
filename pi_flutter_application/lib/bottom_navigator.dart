@@ -1,4 +1,4 @@
-import 'pages/premium_page.dart';
+import 'pages/admin_page.dart';
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
 import 'pages/search_page.dart';
@@ -39,7 +39,9 @@ class _BottomNavigatorState extends State<BottomNavigator> {
     ];
     bool isAdmin = role == 'admin' ? true : false;
     if (isAdmin == true) {
-      pages.add(const AdminPage());
+      pages.add(AdminPage(
+        token: widget.token,
+      ));
     }
 
     return Scaffold(

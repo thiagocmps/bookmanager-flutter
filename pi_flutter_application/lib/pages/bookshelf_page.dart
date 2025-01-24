@@ -101,6 +101,7 @@ class _LibraryPageState extends State<LibraryPage> {
                                     builder: (context) => UserbookDetailPage(
                                       book: book,
                                       token: widget.token,
+                                      decodedToken: widget.decodedToken,
                                     ),
                                   ),
                                 );
