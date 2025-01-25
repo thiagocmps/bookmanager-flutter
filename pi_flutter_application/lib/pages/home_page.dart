@@ -14,7 +14,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
-  List searchResults = [];
+  List searchResults = []; // Lista que armazena os resultados da busca
 
   final genres = [
     'Fantasy',
@@ -59,95 +59,27 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('Building HomePage'); // Adicionado para debug
     return Scaffold(
       body: Column(
         children: [
-          searchResults.isNotEmpty
-              ? Expanded(
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.6,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 8.0,
-                    ),
-                    itemCount: searchResults.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                           _navigateToDetailPage(searchResults[index]);  
-                        },
-                        behavior: HitTestBehavior.translucent,
-                        child: Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                height: 120,
-                                decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.vertical(
-                                      top: Radius.circular(12)),
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                        searchResults[index].imageUrl),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      searchResults[index].title,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      searchResults[index].description,
-                                      maxLines: 3,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    _buildRatingStars(
-                                        searchResults[index].rating),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: genres.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: GenreSection(
+                    genre: genres[index],
+                    genreNumber: index + 1,
+                    token: widget.token,
+                    decodedToken: widget.decodedToken,
                   ),
-                )
-              : Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: genres.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 24),
-                        child: GenreSection(
-                          genre: genres[index],
-                          genreNumber: index + 1,
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -157,11 +89,14 @@ class _HomePageState extends State<HomePage> {
 class GenreSection extends StatefulWidget {
   final genre;
   final int genreNumber;
-
+  final token;
+  final decodedToken;
   const GenreSection({
     super.key,
     required this.genre,
     required this.genreNumber,
+    required this.token,
+    required this.decodedToken,
   });
 
   @override
@@ -243,7 +178,11 @@ class _GenreSectionState extends State<GenreSection> {
                       .map(
                         (books) => Padding(
                           padding: const EdgeInsets.only(right: 16),
-                          child: BookCard(book: books),
+                          child: BookCard(
+                            book: books,
+                            token: widget.token,
+                            decodedToken: widget.decodedToken,
+                          ),
                         ),
                       )
                       .toList(),
@@ -259,94 +198,110 @@ class _GenreSectionState extends State<GenreSection> {
 
 class BookCard extends StatelessWidget {
   final book;
-
+  final token;
+  final decodedToken;
   const BookCard({
     super.key,
+    required this.token,
+    required this.decodedToken,
     required this.book,
   });
 
   @override
   Widget build(BuildContext context) {
     final volumeInfo = book['volumeInfo'];
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                volumeInfo['imageLinks'] != null &&
-                        volumeInfo['imageLinks']['thumbnail'].isNotEmpty
-                    ? volumeInfo['imageLinks']['thumbnail']
-                    : 'https://via.placeholder.com/100',
-                width: 100,
-                height: 150,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 100,
-                    height: 150,
-                    /* color: Colors.grey[300], */
-                    child: const Icon(Icons.book, size: 40),
-                  );
-                },
-              ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookDetailPage(
+              book: book,
+              token: token,
+              decodedToken: decodedToken,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    volumeInfo['title'],
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    volumeInfo['authors']?.join(', ') ?? 'Autor desconhecido',
-                    style: TextStyle(
-                      color: Colors.grey[700],
-                      fontSize: 13,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${volumeInfo['pageCount']} páginas',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildRatingStars(volumeInfo['averageRating'] != null
-                      ? volumeInfo['averageRating'].toDouble()
-                      : 0),
-                ],
-              ),
+          ),
+        );
+      },
+      child: Container(
+        width: 280,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  volumeInfo['imageLinks'] != null &&
+                          volumeInfo['imageLinks']['thumbnail'].isNotEmpty
+                      ? volumeInfo['imageLinks']['thumbnail']
+                      : 'https://via.placeholder.com/100',
+                  width: 100,
+                  height: 150,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 100,
+                      height: 150,
+                      child: const Icon(Icons.book, size: 40),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      volumeInfo['title'],
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      volumeInfo['authors']?.join(', ') ?? 'Autor desconhecido',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${volumeInfo['pageCount']} páginas',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildRatingStars(volumeInfo['averageRating'] != null
+                        ? volumeInfo['averageRating'].toDouble()
+                        : 0),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
