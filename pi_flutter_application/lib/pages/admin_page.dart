@@ -28,7 +28,8 @@ class _AdminPageState extends State<AdminPage> {
 
     try {
       final response = await http.get(
-        Uri.parse("http://192.168.1.217:5000/books/alluserbooks"),
+        Uri.parse(
+            "https://bookmanager-api-express-js.onrender.com/books/alluserbooks"),
         headers: {'Authorization': 'Bearer ${widget.token}'},
       );
 
@@ -70,7 +71,7 @@ class _AdminPageState extends State<AdminPage> {
     try {
       final response = await http.patch(
         Uri.parse(
-            "http://192.168.1.217:5000/books/updateuserbookreview/$commentId"),
+            "https://bookmanager-api-express-js.onrender.com/books/updateuserbookreview/$commentId"),
         headers: {
           'Authorization': 'Bearer ${widget.token}',
           'Content-Type': 'application/json',
